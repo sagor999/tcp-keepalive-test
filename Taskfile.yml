@@ -1,0 +1,26 @@
+# https://taskfile.dev
+
+version: '2'
+
+vars:
+  NAME: tcp-keepalive-test
+  VERSION: 0.1
+  COMMIT: {sh: git rev-parse --verify HEAD}
+  BUILD_FLAGS: -ldflags "-X main.VERSION={{.VERSION}} -X main.COMMIT={{.COMMIT}}"
+
+tasks:
+  build:
+    cmds:
+      - go build .
+  container:
+    cmds:
+      - docker build -t paveltumik/{{.NAME}}:latest 
+          --build-arg BUILD_FLAGS='{{.BUILD_FLAGS}}' .
+  publish:
+    deps: [container]
+    cmds:
+      - docker push paveltumik/{{.NAME}}:latest
+  vendor:
+    cmds:
+      - go mod tidy
+      - go mod vendor
